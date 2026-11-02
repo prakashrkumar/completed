@@ -1,32 +1,37 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { forwardRef, Get, Inject, Injectable } from '@nestjs/common';
 import { AuthService } from 'src/auth/auth.service';
+import { CreateUserDto } from './dtos/create-user.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { User } from './user.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class UsersService {
 
-     users:{id:number,name:string,email:string,age:number,gender:string,isMarried:boolean,password:string}[]=[
-        {id:1,name:"prakash kumar",email:"Prakashr17032000@gmail.com",age:27,gender:"Male",isMarried:false,password:"Prakshr@0234"},
-        {id:2,name:"PoojaBhushan",email:"Bhushan@gmail.com",age:29,gender:"Female",isMarried:true,password:"Prakshr@0235"},
-         {id:3,name:"Rupam",age:30,email:"Anupam@gmail.com",gender:"Female",isMarried:true,password:"Prakshr@0235"}
+   constructor(
+    @InjectRepository(User)
+   private userRepository:Repository<User>
+    
+   ){}
+   getAllUsers(){
+return this .userRepository.find()
+   }
 
-    ]
-    constructor(@Inject(forwardRef(()=>AuthService))  private readonly authService:AuthService){}
-
-     getUsers(){
-      if(this.authService.authincated){
-       return this.users;
-      }
-      return "your are not login beacuse not authenticated"
-      
-     }
-
-
-    getUserById(id:Number){
-        return this.users.find(x=>x.id===id);
-
+   
+   public async createUser(userDto:CreateUserDto){
+    // validate if a user exist with the given email
+    const user=await this.userRepository.findOne({
+        where:{email:userDto.email}
+    })
+    // Handle the error/exception
+    if(user){
+        return 'the user with the given email allready exists'
     }
-    createUser(user:{id:number,name:string,email:string,age:number,gender:string,isMarried:boolean,password:string}){
-       return this.users.push(user)  
-    }
+    // create the user
+    let newUser= this.userRepository.create(userDto);
+    newUser=await this.userRepository.save(newUser)
+    return newUser;
+
+   }
 
 }
