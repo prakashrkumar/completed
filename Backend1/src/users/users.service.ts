@@ -4,33 +4,54 @@ import { CreateUserDto } from './dtos/create-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './user.entity';
 import { Repository } from 'typeorm';
+import { profile } from 'src/profile/profile.entity';
 
 @Injectable()
 export class UsersService {
 
    constructor(
     @InjectRepository(User)
-   private userRepository:Repository<User>
+   private userRepository:Repository<User>,
+   @InjectRepository(profile)
+   private profileRepository:Repository<profile>
     
    ){}
    getAllUsers(){
-return this .userRepository.find()
+    // erger loading m-1 commient wala
+// return this .userRepository.find({
+//     relations:{   
+//         profile:true
+//     }
+// })
+
+return this.userRepository.find() // m-2 user entity me
    }
 
    
    public async createUser(userDto:CreateUserDto){
-    // validate if a user exist with the given email
-    const user=await this.userRepository.findOne({
-        where:{email:userDto.email}
-    })
-    // Handle the error/exception
-    if(user){
-        return 'the user with the given email allready exists'
-    }
-    // create the user
-    let newUser= this.userRepository.create(userDto);
-    newUser=await this.userRepository.save(newUser)
-    return newUser;
+//    // Create a proife & save
+//    userDto.profile=userDto.profile ?? {};
+//    let Profile=this.profileRepository.create(userDto.profile);
+//    await this.profileRepository.save(Profile)
+
+//    // create User Object
+//    let user=this.userRepository.create(userDto);
+
+//    user.profile=Profile;
+
+//    // Save the user object
+//   return  await this.userRepository.save(user)
+
+
+
+
+
+//when using cascding and same result acchive and using this method
+  userDto.profile=userDto.profile ?? {}
+  // create user Object
+  let user=this.userRepository.create(userDto);
+  // save the user object
+  return await this.userRepository.save(user)
 
    }
 

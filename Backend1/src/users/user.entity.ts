@@ -1,4 +1,6 @@
-import { Column, CreateDateColumn, DeleteDateColumn, Entity,  PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { IsOptional } from "class-validator";
+import { profile } from "src/profile/profile.entity";
+import { Column, CreateDateColumn, DeleteDateColumn, Entity,  JoinColumn,  OneToOne,  PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 @Entity()
 export class User{
@@ -29,6 +31,22 @@ export class User{
         length:100
 })
     password:string;
+  @IsOptional()
+
+  @OneToOne(()=>profile,{
+    cascade:['insert'],
+    eager:true // for erger loading
+  })
+    
+
+  @JoinColumn()
+    profile?:profile
+
+
+
+
+
+
       @CreateDateColumn()
     createdAt:Date;
     @UpdateDateColumn()
