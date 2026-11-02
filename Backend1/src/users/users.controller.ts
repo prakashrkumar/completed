@@ -1,36 +1,41 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post, Query } from '@nestjs/common';
+import { Body, Controller, DefaultValuePipe, Get, Param, ParseBoolPipe, ParseIntPipe, Patch, Post, Query, ValidationPipe } from '@nestjs/common';
 import { UsersService } from './users.service';
+import { CreateUserDto } from './dtos/create-user.dto';
+import { GetUserParamDto } from './dtos/get-user-param.dto';
+import { UpadateUserDto } from './dtos/update-user-param.dto';
 
 @Controller('users')
 export class UsersController {
  constructor(private readonly userService :UsersService){}
-    @Get()
-    //getuers(@Query('gender') query:any)   query se only gender aayega
-    //getuers(@Query() query:any)  abhi query me ja sabhiaayega dot se nikhal skte ho
-    getuers(@Query() query:any){  
-        console.log(query)
-        if(query.gender){
-       return     this.userService.getUsers().filter(x=>x.gender===query.gender)
+    @Get('{/:isMarried}')
 
-        }
+    getuers(@Query('limit',new DefaultValuePipe(4),ParseIntPipe) limit:number,
+    @Query('page',new DefaultValuePipe(9),ParseIntPipe) page:number,
+@Param() param:GetUserParamDto)// jab koe parameter ke sath pipline pass karte to o optional parameter nahi required ho jataa
+{ 
+
+        console.log(limit,page,param);
+        
     return  this.userService.getUsers()
     }
     
-    //getUserById(@Param('id') id:string)
-    // for make optional->it kept alawys  last isMarried->optional
-    // @Get(':id/:name{/:gender}')
-   
-    //getUserById(@Param() param:any)
+    
  @Get(':id')
     getUserById(@Param('id',ParseIntPipe) id:number){
-        //console.log(param,param.name)
-      //  return this.userService.getUserById(Number(id))
+
         return this.userService.getUserById(id)
 
     }
     @Post()
-    createUser(@Body() user:{id:number,name:string,age:number,gender:string,isMarried:boolean}){
-        this.userService.createUser(user)
+    createUser(@Body() user:CreateUserDto){
+       // this.userService.createUser(user)
+       console.log(user)
         return "new user cretae successfully"
+    }
+
+    @Patch()
+    updateUser(@Body() user:UpadateUserDto){
+        console.log(user)
+        return "partical update"
     }
 }
