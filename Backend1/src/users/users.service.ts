@@ -17,14 +17,14 @@ export class UsersService {
     
    ){}
    getAllUsers(){
-    // erger loading m-1 commient wala
-// return this .userRepository.find({
-//     relations:{   
-//         profile:true
-//     }
-// })
+   // erger loading m-1 commient wala
+return this .userRepository.find({
+    relations:{   
+        profile:true
+    }
+})
 
-return this.userRepository.find() // m-2 user entity me
+//return this.userRepository.find() // m-2 user entity me
    }
 
    
@@ -52,6 +52,31 @@ return this.userRepository.find() // m-2 user entity me
   let user=this.userRepository.create(userDto);
   // save the user object
   return await this.userRepository.save(user)
+
+   }
+
+
+   public async deleteUser(id:number){
+
+      // // find  the user with given id
+      // let user=await this.userRepository.findOneBy({id})
+
+      // // Delete user
+      // await this.userRepository.delete(id);
+      // // Delete  the profile
+      // this.profileRepository.delete(user.profile.id)
+
+      // //send a response
+      // return {delete:true} 
+
+
+      // using cascading prefard this method
+      //Delete the user
+
+      await this.userRepository.delete(id);
+
+      // send a response
+      return {delete:true};
 
    }
 

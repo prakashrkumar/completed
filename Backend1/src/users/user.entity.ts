@@ -33,13 +33,13 @@ export class User{
     password:string;
   @IsOptional()
 
-  @OneToOne(()=>profile,{
+  @OneToOne(()=>profile,(profile)=>profile.user,{
     cascade:['insert'],
-    eager:true // for erger loading
+   
   })
     
 
-  @JoinColumn()
+  
     profile?:profile
 
 
