@@ -55,4 +55,8 @@ return this.userRepository.find() // m-2 user entity me
 
    }
 
+   public async FindUserById(id:number){
+     return  await this.userRepository.findOneBy({id})
+   }
+
 }
