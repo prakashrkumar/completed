@@ -5,11 +5,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './user.entity';
 import { Repository } from 'typeorm';
 import { profile } from 'src/profile/profile.entity';
+import { ConfigService } from '@nestjs/config';
+
 
 @Injectable()
 export class UsersService {
 
    constructor(
+      private readonly configService:ConfigService,
     @InjectRepository(User)
    private userRepository:Repository<User>,
    @InjectRepository(profile)
@@ -17,6 +20,14 @@ export class UsersService {
     
    ){}
    getAllUsers(){
+
+
+      // test config
+const envirment=this.configService.get<string>('ENV_MODE')
+// const envirment=process.env.ENV_MODE;
+console.log(envirment)
+
+
     // erger loading m-1 commient wala
 // return this .userRepository.find({
 //     relations:{   
@@ -25,6 +36,8 @@ export class UsersService {
 // })
 
 return this.userRepository.find() // m-2 user entity me
+
+
    }
 
    
