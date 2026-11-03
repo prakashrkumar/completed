@@ -20,4 +20,9 @@ return await    this.hashtagRepository.find({
     })
 
 }
+
+public async deleteHashtag(id:number){
+    await this.hashtagRepository.delete({id:id})
+    return {deleted:true,id}
+}
 }

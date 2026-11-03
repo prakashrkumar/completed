@@ -28,8 +28,12 @@ export class Tweet{
     @ManyToOne(()=>User,(user)=>user.tweets)
     user:User
 
-
-     @ManyToMany(()=>Hashtag)
+// many to many one directional
+   //   @ManyToMany(()=>Hashtag)
+   //   @JoinTable({
+   //    name: 'tweet_hashtags_hashtag'
+   //   })
+   @ManyToMany(()=>Hashtag,(hashtag)=>hashtag.tweet)
      @JoinTable({
       name: 'tweet_hashtags_hashtag'
      })
