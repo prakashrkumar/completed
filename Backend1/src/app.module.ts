@@ -7,6 +7,8 @@ import { AuthModule } from './auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './users/user.entity';
 import { ProfileModule } from './profile/profile.module';
+import { HashtagModule } from './hashtag/hashtag.module';
+
 
 
 @Module({
@@ -27,7 +29,9 @@ import { ProfileModule } from './profile/profile.module';
       database:"nestjs_db"
       })
     }),
-    ProfileModule
+    ProfileModule,
+    HashtagModule
+   
   ],
   controllers: [AppController],
   providers: [AppService],
