@@ -1,4 +1,4 @@
-import { forwardRef, Get, Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, forwardRef, Get, HttpException, HttpStatus, Inject, Injectable, RequestTimeoutException } from '@nestjs/common';
 import { AuthService } from 'src/auth/auth.service';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -6,6 +6,8 @@ import { User } from './user.entity';
 import { Repository } from 'typeorm';
 import { profile } from 'src/profile/profile.entity';
 import { ConfigService } from '@nestjs/config';
+import { UserAlreadyExitsException } from 'src/CustomExceptions/user-already-exist.exception';
+
 
 
 @Injectable()
@@ -19,57 +21,92 @@ export class UsersService {
    private profileRepository:Repository<profile>
     
    ){}
-   getAllUsers(){
+  public async  getAllUsers(){
+     try{
+      return await this.userRepository.find({
+         relations:{
+            profile:true
+         }
+      })
+      
+     }
+     catch(error){
+ if(error.code === 'ECONNREFUSED'){
+             throw new RequestTimeoutException('An error has occured. please try again later',{
+   description:'Could not connect to database'
+})
+}
+if(error.code==='23505'){
+   throw new BadRequestException('There is some dublicate value for the user in Database')
+}
 
 
-      // test config
-const envirment=this.configService.get<string>('ENV_MODE')
-// const envirment=process.env.ENV_MODE;
-console.log(envirment)
-
-
-    // erger loading m-1 commient wala
-// return this .userRepository.find({
-//     relations:{   
-//         profile:true
-//     }
-// })
-
-return this.userRepository.find() // m-2 user entity me
-
+console.log(error)
+        
+      }
 
    }
 
    
    public async createUser(userDto:CreateUserDto){
-//    // Create a proife & save
-//    userDto.profile=userDto.profile ?? {};
-//    let Profile=this.profileRepository.create(userDto.profile);
-//    await this.profileRepository.save(Profile)
+try{
+ // create a ptofile &save
+ userDto.profile=userDto.profile ??{}
 
-//    // create User Object
-//    let user=this.userRepository.create(userDto);
+ // chekc if user with same username/email already exists
+ const existingUserWithUsername=await this.userRepository.findOne({
+   where:[{username:userDto.username}]
+ })
+ if(existingUserWithUsername){
+   throw new UserAlreadyExitsException('username',userDto.username)
+   
+ }
+ const existingUserWithEmail=await this.userRepository.findOne({
+   where:[{email:userDto.email}]
+ })
+ if(existingUserWithUsername){
+   throw new UserAlreadyExitsException('email',userDto.email)
+   
+ }
 
-//    user.profile=Profile;
+ 
+ 
 
-//    // Save the user object
-//   return  await this.userRepository.save(user)
+// create the user object
+let user=this.userRepository.create(userDto)
+// save user profile
+return await this.userRepository.save(user)
+   }
+   catch(error){
+      if(error.code === 'ECONNREFUSED'){
+             throw new RequestTimeoutException('An error has occured. please try again later',{
+   description:'Could not connect to database'
+})
 
 
-
-
-
-//when using cascding and same result acchive and using this method
-  userDto.profile=userDto.profile ?? {}
-  // create user Object
-  let user=this.userRepository.create(userDto);
-  // save the user object
-  return await this.userRepository.save(user)
+      }
+      // if(error.code=== '23505'){
+//    throw new BadRequestException('There is some dublivate value for the data base ')
+// }
+throw error;
+console.log(error)
+  
 
    }
+}
 
    public async FindUserById(id:number){
-     return  await this.userRepository.findOneBy({id})
+     const user=  await this.userRepository.findOneBy({id})
+     if(!user){
+      throw new HttpException({
+         status:HttpStatus.NOT_FOUND,
+         error:'the user with ID '+ id + ' was not found',
+         table:'user'
+      }, HttpStatus.NOT_FOUND, {
+         description:'The exception occured beacuse a user with ID ' + id + ' was not found'
+      })
+     }
+     return user;
    }
 
 }
