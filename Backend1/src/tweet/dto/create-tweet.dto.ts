@@ -8,9 +8,7 @@ export class CreateTweetDto{
     @IsOptional()
     image?:string;
 
-    @IsNotEmpty()
-    @IsInt()
-    userId:number;
+    
      
     @IsOptional()
     @IsArray()

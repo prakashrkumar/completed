@@ -6,6 +6,11 @@ import { User } from './user.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { profile } from 'src/profile/profile.entity';
 import { PaginationModule } from 'src/common/pagination/pagination.module';
+import { ConfigModule } from '@nestjs/config';
+import authConfig from 'src/auth/config/auth.config';
+import { JwtModule } from '@nestjs/jwt';
+import { APP_GUARD } from '@nestjs/core';
+import { AuthorizeGurad } from 'src/auth/guards/AuthorizeGurad';
 
 @Module({
   providers: [UsersService ],
@@ -15,7 +20,9 @@ import { PaginationModule } from 'src/common/pagination/pagination.module';
   imports:[
     PaginationModule,
     TypeOrmModule.forFeature([User,profile]),
-    forwardRef(()=>AuthModule)
+    forwardRef(()=>AuthModule),
+  
+
   ]
   
 })

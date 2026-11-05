@@ -3,18 +3,21 @@ import { AuthService } from './auth.service';
 import { CreateUserDto } from 'src/users/dtos/create-user.dto';
 import { LoginDto } from './dto/login.dto';
 import { HashingProvider } from './provider/hashing.provider';
+import { AllowAnonymous } from './decorators/allow-anonymous.decorator';
 
 @Controller('auth')
 export class AuthController {
     constructor(private readonly authService:AuthService 
        
     ){}
+    @AllowAnonymous()
     @Post('login')
     @HttpCode(HttpStatus.OK)
     login(@Body() loginDto:LoginDto){
        return  this.authService.login(loginDto)
 
     }
+    @AllowAnonymous()
     @Post('signup')
    public async signup(@Body() createUserDto:CreateUserDto){
       return   await this.authService.signup(createUserDto)

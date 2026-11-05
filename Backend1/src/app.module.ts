@@ -5,43 +5,40 @@ import { UsersModule } from './users/users.module';
 import { TweetModule } from './tweet/tweet.module';
 import { AuthModule } from './auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-
 import { ProfileModule } from './profile/profile.module';
 import { HashtagModule } from './hashtag/hashtag.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PaginationModule } from './common/pagination/pagination.module';
-import  appConfig  from './config/app.config';
+import appConfig from './config/app.config';
 import databaseConfig from './config/database.config';
-import envValidation from './auth/config/env.validation';
+import envValidation from './config/env.validation';
+import { APP_GUARD } from '@nestjs/core';
+import { AuthorizeGurad } from './auth/guards/AuthorizeGurad';
+import { JwtModule } from '@nestjs/jwt';
+import authConfig from './auth/config/auth.config';
 
-const ENV=process.env.NODE_ENV;
-
-
+const ENV = process.env.NODE_ENV;
 
 @Module({
   imports: [
-     // config module — sabse pehle load karo
-     ConfigModule.forRoot({
-      isGlobal:true,
-      envFilePath:!ENV? '.env':`.env.${ENV.trim()}`,
-      load:[appConfig,databaseConfig],
-      validationSchema:envValidation
-      
-     }),
-    // data base connection
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: !ENV ? '.env' : `.env.${ENV.trim()}`,
+      load: [appConfig, databaseConfig],
+      validationSchema: envValidation
+    }),
     TypeOrmModule.forRootAsync({
-      imports:[ConfigModule],
-      inject:[ConfigService],
-      useFactory:(configService:ConfigService)=>({
-        type:'mysql',
-
-      autoLoadEntities:configService.get('database.autoLoadEntities'),
-      synchronize:configService.get('database.syncronize'),
-      host:configService.get('database.host'),
-      port:+configService.get('database.port'),
-      username:configService.get('database.username'),
-      password:configService.get('database.password'),
-      database:configService.get('database.name')
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        type: 'mysql',
+        autoLoadEntities: configService.get('database.autoLoadEntities'),
+        synchronize: configService.get('database.syncronize'),
+        host: configService.get('database.host'),
+        port: +configService.get('database.port'),
+        username: configService.get('database.username'),
+        password: configService.get('database.password'),
+        database: configService.get('database.name')
       })
     }),
     ProfileModule,
@@ -50,8 +47,16 @@ const ENV=process.env.NODE_ENV;
     TweetModule,
     AuthModule,
     PaginationModule,
+    ConfigModule.forFeature(authConfig),
+    JwtModule.registerAsync(authConfig.asProvider()),
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: AuthorizeGurad
+    }
+  ],
 })
 export class AppModule {}

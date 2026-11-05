@@ -1,8 +1,9 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, Req } from '@nestjs/common';
 import { TweetService } from './tweet.service';
 import { CreateTweetDto } from './dto/create-tweet.dto';
 import { UpdateTweetDto } from './dto/update-tweet.dto';
 import { PaginationQueryDto } from 'src/common/pagination/dto/pagination-query.dto';
+import { ActiveUser } from 'src/auth/decorators/active.user.decorator';
 
 @Controller('tweet')
 export class TweetController {
@@ -16,8 +17,9 @@ export class TweetController {
     return this.tweetService.getTweet(userid,paginationQueryDto)
   }
   @Post()
-  public CreateTweet(@Body() tweet:CreateTweetDto){
-    return this.tweetService.CreateTweet(tweet);
+  public CreateTweet(@Body() tweet:CreateTweetDto,@ActiveUser('sub') userId){
+  //  console.log(user)
+   return this.tweetService.CreateTweet(tweet,userId)
   }
 @Patch()
 public  updateTweet(@Body() tweet:UpdateTweetDto){
