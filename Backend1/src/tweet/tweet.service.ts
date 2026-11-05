@@ -7,29 +7,35 @@ import { CreateTweetDto } from './dto/create-tweet.dto';
 
 import { HashtagService } from 'src/hashtag/hashtag.service';
 import { UpdateTweetDto } from './dto/update-tweet.dto';
+import { PaginationQueryDto } from 'src/common/pagination/dto/pagination-query.dto';
+
+import { PaginationProvider } from 'src/common/pagination/pagination.provider';
+import { Paginated } from 'src/common/pagination/paginater.interface';
 
 @Injectable()
 export class TweetService {
     constructor(
         private readonly userService:UsersService,
           private readonly hashtagService:HashtagService,
-       @InjectRepository(Tweet) private readonly tweetRepository:Repository<Tweet>
+       @InjectRepository(Tweet) private readonly tweetRepository:Repository<Tweet>,
+       private readonly paginationProvider:PaginationProvider
      
        
     ){}
    
 
 
- public async   getTweet(userId:number){
-  let user=await this.userService.FindUserById(userId)
-  if(user){
+ public async getTweet(userId:number,PageQueryDto:PaginationQueryDto):Promise<Paginated<Tweet>>{
+  let user = await this.userService.FindUserById(userId)
+  if(!user){
     throw new NotFoundException(`this ${userId} user is not found`)
   }
-   return    await this.tweetRepository.find({
-        where:{ user:{id:userId}},
-        relations:{user:true,hashtags:true}
-      })
-       
+
+   return await this.paginationProvider.paginateQuery(
+  PageQueryDto,
+    this.tweetRepository,
+    {user:{id:userId}}
+   )
     }
 
 

@@ -7,6 +7,9 @@ import { Repository } from 'typeorm';
 import { profile } from 'src/profile/profile.entity';
 import { ConfigService } from '@nestjs/config';
 import { UserAlreadyExitsException } from 'src/CustomExceptions/user-already-exist.exception';
+import { PaginationProvider } from 'src/common/pagination/pagination.provider';
+import { PaginationQueryDto } from 'src/common/pagination/dto/pagination-query.dto';
+import { Paginated } from 'src/common/pagination/paginater.interface';
 
 
 
@@ -18,32 +21,37 @@ export class UsersService {
     @InjectRepository(User)
    private userRepository:Repository<User>,
    @InjectRepository(profile)
-   private profileRepository:Repository<profile>
-    
+   private profileRepository:Repository<profile>,
+   private readonly paginationProvider:PaginationProvider
+   
    ){}
-  public async  getAllUsers(){
+  public async  getAllUsers(paginationQueryDto:PaginationQueryDto):Promise<Paginated<User>>{
      try{
-      return await this.userRepository.find({
-         relations:{
-            profile:true
-         }
-      })
+  return   await  this.paginationProvider.paginateQuery(
+         paginationQueryDto,
+         this.userRepository,
+         null,
+         {profile:true}
+
+      )
+      // return await this.userRepository.find({
+      //    relations:{
+      //       profile:true
+      //    }
+      // })
       
      }
      catch(error){
- if(error.code === 'ECONNREFUSED'){
+       if((error as any).code === 'ECONNREFUSED'){
              throw new RequestTimeoutException('An error has occured. please try again later',{
-   description:'Could not connect to database'
-})
-}
-if(error.code==='23505'){
-   throw new BadRequestException('There is some dublicate value for the user in Database')
-}
-
-
-console.log(error)
-        
-      }
+               description:'Could not connect to database'
+             })
+       }
+       if((error as any).code==='23505'){
+          throw new BadRequestException('There is some dublicate value for the user in Database')
+       }
+       console.log(error)
+     }
 
    }
 
@@ -78,20 +86,12 @@ let user=this.userRepository.create(userDto)
 return await this.userRepository.save(user)
    }
    catch(error){
-      if(error.code === 'ECONNREFUSED'){
+      if((error as any).code === 'ECONNREFUSED'){
              throw new RequestTimeoutException('An error has occured. please try again later',{
-   description:'Could not connect to database'
-})
-
-
+               description:'Could not connect to database'
+             })
       }
-      // if(error.code=== '23505'){
-//    throw new BadRequestException('There is some dublivate value for the data base ')
-// }
-throw error;
-console.log(error)
-  
-
+      throw error;
    }
 }
 

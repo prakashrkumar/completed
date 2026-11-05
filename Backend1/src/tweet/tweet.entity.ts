@@ -25,7 +25,7 @@ export class Tweet{
      
 // for eager method m->2 where
    // @ManyToOne(()=>User,(user)=>user.tweets,{eager:true })
-    @ManyToOne(()=>User,(user)=>user.tweets)
+    @ManyToOne(()=>User,(user)=>user.tweets,{eager:true})
     user:User
 
 // many to many one directional
@@ -33,7 +33,7 @@ export class Tweet{
    //   @JoinTable({
    //    name: 'tweet_hashtags_hashtag'
    //   })
-   @ManyToMany(()=>Hashtag,(hashtag)=>hashtag.tweet)
+   @ManyToMany(()=>Hashtag,(hashtag)=>hashtag.tweet,{eager:true})
      @JoinTable({
       name: 'tweet_hashtags_hashtag'
      })

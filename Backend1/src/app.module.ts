@@ -9,6 +9,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ProfileModule } from './profile/profile.module';
 import { HashtagModule } from './hashtag/hashtag.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { PaginationModule } from './common/pagination/pagination.module';
 import  appConfig  from './config/app.config';
 import databaseConfig from './config/database.config';
 import envValidation from './auth/config/env.validation';
@@ -48,6 +49,7 @@ const ENV=process.env.NODE_ENV;
     UsersModule,
     TweetModule,
     AuthModule,
+    PaginationModule,
   ],
   controllers: [AppController],
   providers: [AppService],
