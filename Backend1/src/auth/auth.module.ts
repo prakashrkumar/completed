@@ -3,12 +3,17 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { UsersModule } from 'src/users/users.module';
 import { ConfigModule } from '@nestjs/config';
+import { HashingProvider } from './provider/hashing.provider';
+import { BcryptProvider } from './provider/bcrypt.provider';
 import authConfig from './config/auth.config';
 
 @Module({
-  providers: [AuthService],
+  providers: [AuthService, {
+    provide:HashingProvider,
+    useClass:BcryptProvider
+  }],
   controllers: [AuthController],
-  exports:[AuthService],
+  exports:[AuthService,HashingProvider],
   // due to circular dependency 
   // imports:[UsersModule],
   imports:[

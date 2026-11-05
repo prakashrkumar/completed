@@ -1,4 +1,4 @@
-import { BadRequestException, forwardRef, Get, HttpException, HttpStatus, Inject, Injectable, RequestTimeoutException } from '@nestjs/common';
+import { BadRequestException, forwardRef, Get, HttpException, HttpStatus, Inject, Injectable, RequestTimeoutException, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from 'src/auth/auth.service';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -10,6 +10,7 @@ import { UserAlreadyExitsException } from 'src/CustomExceptions/user-already-exi
 import { PaginationProvider } from 'src/common/pagination/pagination.provider';
 import { PaginationQueryDto } from 'src/common/pagination/dto/pagination-query.dto';
 import { Paginated } from 'src/common/pagination/paginater.interface';
+import { HashingProvider } from 'src/auth/provider/hashing.provider';
 
 
 
@@ -22,7 +23,10 @@ export class UsersService {
    private userRepository:Repository<User>,
    @InjectRepository(profile)
    private profileRepository:Repository<profile>,
-   private readonly paginationProvider:PaginationProvider
+   private readonly paginationProvider:PaginationProvider,
+
+   @Inject(forwardRef(()=>HashingProvider))
+   private readonly hashingProvider:HashingProvider
    
    ){}
   public async  getAllUsers(paginationQueryDto:PaginationQueryDto):Promise<Paginated<User>>{
@@ -81,7 +85,10 @@ try{
  
 
 // create the user object
-let user=this.userRepository.create(userDto)
+let user=this.userRepository.create({
+  ...userDto,
+  password:await this.hashingProvider.hashPassword(userDto.password)
+})
 // save user profile
 return await this.userRepository.save(user)
    }
@@ -107,6 +114,26 @@ return await this.userRepository.save(user)
       })
      }
      return user;
+   }
+
+
+   public async findUserByUsername(username:string){
+    let user:User | null=null;
+    try{
+     user=await this.userRepository.findOneBy({
+      username
+     })
+    }
+    catch(error){
+      throw new RequestTimeoutException(error,{
+        description:'User with given username could not be found'
+      })
+
+    }
+    if(!user){
+      throw new UnauthorizedException('User does not exist')
+    }
+    return user;
    }
 
 }

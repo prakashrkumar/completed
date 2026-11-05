@@ -8,13 +8,15 @@ import { profile } from 'src/profile/profile.entity';
 import { PaginationModule } from 'src/common/pagination/pagination.module';
 
 @Module({
-  providers: [UsersService],
+  providers: [UsersService ],
   controllers: [UsersController],
   exports:[UsersService],
   // ese ke karan table create hota hai
   imports:[
     PaginationModule,
-    TypeOrmModule.forFeature([User,profile])]
+    TypeOrmModule.forFeature([User,profile]),
+    forwardRef(()=>AuthModule)
+  ]
   
 })
 export class UsersModule {}
