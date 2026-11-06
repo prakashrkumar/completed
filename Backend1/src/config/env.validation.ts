@@ -9,7 +9,11 @@ export default Joi.object({
     DB_USERNAME: Joi.string().required(),
     DB_PASSWORD: Joi.string().required(),
     DB_NAME: Joi.string().required(),
-    JWT_TOKEN_SECRET:Joi.string().required()
+    JWT_TOKEN_SECRET:Joi.string().required(),
+    JWT_TOKEN_EXPIRESIN:Joi.number().required(),
+    REFRESH_TOKEN_EXPIRESIN:Joi.number().required(),
+    JWT_TOKEN_AUDIENCE:Joi.string().required(),
+    JWT_TOKEN_ISSUER:Joi.string().required()
     // DB_SYNC: Joi.string().valid('true', 'false').default('false'),
     // AUTO_LOAD: Joi.string().valid('true', 'false').default('false'),
 })
